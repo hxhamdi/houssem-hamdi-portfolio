@@ -1,19 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:portfolio_website/models/profile_model.dart';
+import 'package:portfolio_website/models/cv_model.dart';
 import 'package:portfolio_website/shared/responsive/responsive_layout.dart';
 import 'package:portfolio_website/shared/animations/fade_in_animation.dart';
-import 'package:portfolio_website/core/constants/app_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
+import 'package:portfolio_website/providers/portfolio_provider.dart';
 
 class ContactSection extends StatelessWidget {
   const ContactSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final portfolioProvider = Provider.of<PortfolioProvider>(context);
+    final profile = portfolioProvider.profile;
+    final cv = portfolioProvider.cv;
     final theme = Theme.of(context);
+    final isMobile = MediaQuery.of(context).size.width < 768;
+
+    if (portfolioProvider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (profile == null) {
+      return const Center(child: Text('Profile not available'));
+    }
 
     return ResponsiveLayout(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 20),
+        padding: EdgeInsets.symmetric(
+          vertical: isMobile ? 60 : 80,
+          horizontal: 20,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -42,50 +60,68 @@ class ContactSection extends StatelessWidget {
                     context,
                     icon: Icons.email,
                     label: 'Email',
-                    value: AppConstants.email,
-                    onTap: () => _launchURL('mailto:${AppConstants.email}'),
+                    value: profile.email,
+                    onTap: () => _launchURL('mailto:${profile.email}'),
                   ),
                   _buildContactItem(
                     context,
                     icon: Icons.phone,
                     label: 'Téléphone',
-                    value: AppConstants.phone,
-                    onTap: () => _launchURL('tel:${AppConstants.phone}'),
+                    value: profile.phone,
+                    onTap: () => _launchURL('tel:${profile.phone}'),
                   ),
                   _buildContactItem(
                     context,
                     icon: Icons.location_on,
                     label: 'Localisation',
-                    value: AppConstants.location,
+                    value: profile.location,
                   ),
                   _buildSocialItem(
                     context,
                     icon: Icons.code,
                     label: 'GitHub',
-                    url: AppConstants.githubUrl,
+                    url: 'https://github.com/hxhamdi',
                   ),
                   _buildSocialItem(
                     context,
                     icon: Icons.business,
                     label: 'LinkedIn',
-                    url: AppConstants.linkedinUrl,
+                    url: 'https://linkedin.com/in/houssem-hamdi-44bbb81b8',
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 60),
             Center(
-              child: ElevatedButton.icon(
-                onPressed: () => _launchURL('mailto:${AppConstants.email}'),
-                icon: const Icon(Icons.email),
-                label: const Text('Envoyez-moi un message'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 30,
-                    vertical: 15,
+              child: Column(
+                children: [
+                  if (cv != null && cv.downloadEnabled)
+                    ElevatedButton.icon(
+                      onPressed: () => _downloadCV(cv.pdfAssetPath),
+                      icon: const Icon(Icons.download),
+                      label: Text(cv.downloadLabel),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 30,
+                          vertical: 15,
+                        ),
+                        textStyle: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: () => _launchURL('mailto:${profile.email}'),
+                    icon: const Icon(Icons.email),
+                    label: const Text('Envoyez-moi un message'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 15,
+                      ),
+                      textStyle: const TextStyle(fontSize: 16),
+                    ),
                   ),
-                  textStyle: const TextStyle(fontSize: 16),
-                ),
+                ],
               ),
             ),
           ],
@@ -157,6 +193,20 @@ class ContactSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _downloadCV(String pdfPath) async {
+    try {
+      // For web, we need to use the url_launcher to open the PDF
+      if (await canLaunchUrl(Uri.parse(pdfPath))) {
+        await launchUrl(Uri.parse(pdfPath));
+      } else {
+        // For mobile/desktop, we can use the file path directly
+        debugPrint('Downloading CV from: $pdfPath');
+      }
+    } catch (e) {
+      debugPrint('Error downloading CV: $e');
+    }
   }
 
   Future<void> _launchURL(String url) async {

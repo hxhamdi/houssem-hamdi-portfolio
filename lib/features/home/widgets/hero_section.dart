@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio_website/core/constants/app_constants.dart';
+import 'package:portfolio_website/models/profile_model.dart';
+import 'package:portfolio_website/models/cv_model.dart';
 import 'package:portfolio_website/shared/animations/fade_in_animation.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
+import 'package:portfolio_website/providers/portfolio_provider.dart';
 
 class HeroSection extends StatelessWidget {
   final Function(int) onScrollToSection;
@@ -11,8 +14,19 @@ class HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final portfolioProvider = Provider.of<PortfolioProvider>(context);
+    final profile = portfolioProvider.profile;
+    final cv = portfolioProvider.cv;
     final isMobile = MediaQuery.of(context).size.width < 768;
+    final theme = Theme.of(context);
+
+    if (portfolioProvider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (profile == null) {
+      return const Center(child: Text('Profile not available'));
+    }
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -20,12 +34,17 @@ class HeroSection extends StatelessWidget {
         horizontal: 20,
       ),
       child: isMobile
-          ? _buildMobileLayout(context, theme)
-          : _buildDesktopLayout(context, theme),
+          ? _buildMobileLayout(context, theme, profile, cv)
+          : _buildDesktopLayout(context, theme, profile, cv),
     );
   }
 
-  Widget _buildDesktopLayout(BuildContext context, ThemeData theme) {
+  Widget _buildDesktopLayout(
+    BuildContext context,
+    ThemeData theme,
+    Profile profile,
+    CV? cv,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -48,7 +67,7 @@ class HeroSection extends StatelessWidget {
               FadeInAnimation(
                 delay: 0.7,
                 child: Text(
-                  AppConstants.name,
+                  profile.name,
                   style: theme.textTheme.displayLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -92,7 +111,7 @@ class HeroSection extends StatelessWidget {
               FadeInAnimation(
                 delay: 1.1,
                 child: Text(
-                  'Développeur Flutter spécialisé avec une expertise en IoT embarqué et développement backend.',
+                  profile.description,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     height: 1.6,
                   ),
@@ -116,8 +135,22 @@ class HeroSection extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
+                    if (cv != null && cv.downloadEnabled)
+                      OutlinedButton.icon(
+                        onPressed: () => _downloadCV(cv.pdfAssetPath),
+                        icon: const Icon(Icons.download),
+                        label: Text(cv.downloadLabel),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          textStyle: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    const SizedBox(width: 16),
                     OutlinedButton.icon(
-                      onPressed: () => _launchURL('mailto:${AppConstants.email}'),
+                      onPressed: () => onScrollToSection(5), // Contact section
                       icon: const Icon(Icons.email),
                       label: const Text('Me contacter'),
                       style: OutlinedButton.styleFrom(
@@ -151,9 +184,9 @@ class HeroSection extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   radius: 150,
-                  backgroundImage: AssetImage('assets/images/profile.jpg'),
+                  backgroundImage: AssetImage(profile.heroImage),
                   backgroundColor: Colors.transparent,
                 ),
               ),
@@ -164,7 +197,12 @@ class HeroSection extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileLayout(BuildContext context, ThemeData theme) {
+  Widget _buildMobileLayout(
+    BuildContext context,
+    ThemeData theme,
+    Profile profile,
+    CV? cv,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -182,9 +220,9 @@ class HeroSection extends StatelessWidget {
                 ),
               ],
             ),
-            child: const CircleAvatar(
+            child: CircleAvatar(
               radius: 80,
-              backgroundImage: AssetImage('assets/images/profile.jpg'),
+              backgroundImage: AssetImage(profile.heroImage),
               backgroundColor: Colors.transparent,
             ),
           ),
@@ -209,7 +247,7 @@ class HeroSection extends StatelessWidget {
             FadeInAnimation(
               delay: 0.9,
               child: Text(
-                AppConstants.name,
+                profile.name,
                 style: theme.textTheme.displayMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -254,7 +292,7 @@ class HeroSection extends StatelessWidget {
             FadeInAnimation(
               delay: 1.3,
               child: Text(
-                'Développeur Flutter spécialisé avec une expertise en IoT embarqué et développement backend.',
+                profile.description,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   height: 1.6,
                 ),
@@ -279,8 +317,22 @@ class HeroSection extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  if (cv != null && cv.downloadEnabled)
+                    OutlinedButton.icon(
+                      onPressed: () => _downloadCV(cv.pdfAssetPath),
+                      icon: const Icon(Icons.download),
+                      label: Text(cv.downloadLabel),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        textStyle: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  const SizedBox(height: 16),
                   OutlinedButton.icon(
-                    onPressed: () => _launchURL('mailto:${AppConstants.email}'),
+                    onPressed: () => onScrollToSection(5), // Contact section
                     icon: const Icon(Icons.email),
                     label: const Text('Me contacter'),
                     style: OutlinedButton.styleFrom(
@@ -300,9 +352,17 @@ class HeroSection extends StatelessWidget {
     );
   }
 
-  Future<void> _launchURL(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
+  Future<void> _downloadCV(String pdfPath) async {
+    try {
+      // For web, we need to use the url_launcher to open the PDF
+      if (await canLaunchUrl(Uri.parse(pdfPath))) {
+        await launchUrl(Uri.parse(pdfPath));
+      } else {
+        // For mobile/desktop, we can use the file path directly
+        debugPrint('Downloading CV from: $pdfPath');
+      }
+    } catch (e) {
+      debugPrint('Error downloading CV: $e');
     }
   }
 }

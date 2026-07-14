@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio_website/core/constants/app_constants.dart';
+import 'package:portfolio_website/models/profile_model.dart';
 import 'package:portfolio_website/shared/animations/fade_in_animation.dart';
+import 'package:provider/provider.dart';
+import 'package:portfolio_website/providers/portfolio_provider.dart';
 
 class AboutSection extends StatelessWidget {
   const AboutSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final portfolioProvider = Provider.of<PortfolioProvider>(context);
+    final profile = portfolioProvider.profile;
     final isMobile = MediaQuery.of(context).size.width < 768;
+    final theme = Theme.of(context);
+
+    if (portfolioProvider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (profile == null) {
+      return const Center(child: Text('Profile not available'));
+    }
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -29,15 +41,15 @@ class AboutSection extends StatelessWidget {
           ),
           const SizedBox(height: 30),
           if (isMobile)
-            _buildMobileContent(context, theme)
+            _buildMobileContent(context, theme, profile)
           else
-            _buildDesktopContent(context, theme),
+            _buildDesktopContent(context, theme, profile),
         ],
       ),
     );
   }
 
-  Widget _buildDesktopContent(BuildContext context, ThemeData theme) {
+  Widget _buildDesktopContent(BuildContext context, ThemeData theme, Profile profile) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -117,7 +129,7 @@ class AboutSection extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileContent(BuildContext context, ThemeData theme) {
+  Widget _buildMobileContent(BuildContext context, ThemeData theme, Profile profile) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
