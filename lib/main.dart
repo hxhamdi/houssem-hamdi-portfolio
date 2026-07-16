@@ -4,7 +4,7 @@ import 'package:portfolio_website/app.dart';
 import 'package:portfolio_website/services/firebase_service.dart';
 import 'package:provider/provider.dart';
 import 'package:portfolio_website/providers/portfolio_provider.dart';
-import 'package:portfolio_website/services/local_portfolio_repository.dart';
+import 'package:portfolio_website/services/firestore_portfolio_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +18,8 @@ void main() async {
 
   setUrlStrategy(PathUrlStrategy());
 
-  // Use local repository for now
-  final repository = LocalPortfolioRepository();
+  // Use Firestore repository for production
+  final repository = FirestorePortfolioRepository();
 
   runApp(
     ChangeNotifierProvider(

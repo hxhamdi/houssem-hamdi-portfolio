@@ -10,17 +10,15 @@ class ExperienceSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final portfolioProvider = Provider.of<PortfolioProvider>(context);
-    final experience = portfolioProvider.experience;
+    final workExperience = portfolioProvider.getExperienceByType('work');
+    final educationExperience =
+        portfolioProvider.getExperienceByType('education');
     final theme = Theme.of(context);
     final isMobile = MediaQuery.of(context).size.width < 768;
 
     if (portfolioProvider.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-
-    // Separate work and education experience
-    final workExperience = portfolioProvider.getExperienceByType('work');
-    final educationExperience = portfolioProvider.getExperienceByType('education');
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -46,9 +44,11 @@ class ExperienceSection extends StatelessWidget {
           ),
           const SizedBox(height: 40),
           if (isMobile)
-            _buildMobileLayout(context, theme, workExperience, educationExperience)
+            _buildMobileLayout(
+                context, theme, workExperience, educationExperience)
           else
-            _buildDesktopLayout(context, theme, workExperience, educationExperience),
+            _buildDesktopLayout(
+                context, theme, workExperience, educationExperience),
         ],
       ),
     );
@@ -83,7 +83,8 @@ class ExperienceSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          ...educationExperience.map((exp) => _buildExperienceCard(context, exp)),
+          ...educationExperience
+              .map((exp) => _buildExperienceCard(context, exp)),
         ],
       ],
     );
@@ -118,7 +119,8 @@ class ExperienceSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          ...educationExperience.map((exp) => _buildExperienceCard(context, exp)),
+          ...educationExperience
+              .map((exp) => _buildExperienceCard(context, exp)),
         ],
       ],
     );
@@ -205,13 +207,16 @@ class ExperienceSection extends StatelessWidget {
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: exp.techStack.map((tech) => Chip(
-                            label: Text(tech),
-                            backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-                            labelStyle: TextStyle(
-                              color: theme.colorScheme.primary,
-                            ),
-                          )).toList(),
+                          children: exp.techStack
+                              .map((tech) => Chip(
+                                    label: Text(tech),
+                                    backgroundColor: theme.colorScheme.primary
+                                        .withOpacity(0.1),
+                                    labelStyle: TextStyle(
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ))
+                              .toList(),
                         ),
                       // GitHub link if available
                       if (exp.url.isNotEmpty)

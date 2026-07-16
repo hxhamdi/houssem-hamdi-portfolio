@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio_website/models/profile_model.dart';
-import 'package:portfolio_website/models/cv_model.dart';
 import 'package:portfolio_website/shared/responsive/responsive_layout.dart';
 import 'package:portfolio_website/shared/animations/fade_in_animation.dart';
 import 'package:url_launcher/url_launcher.dart';

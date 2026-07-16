@@ -6,7 +6,7 @@ import 'package:portfolio_website/features/home/widgets/hero_section.dart';
 import 'package:portfolio_website/features/home/widgets/about_section.dart';
 import 'package:portfolio_website/features/home/widgets/skills_section.dart';
 import 'package:portfolio_website/features/home/widgets/sections/projects_section.dart';
-import 'package:portfolio_website/features/home/widgets/sections/experience_section.dart';
+import 'package:portfolio_website/features/home/widgets/sections/experience_section.dart' as experience;
 import 'package:portfolio_website/features/home/widgets/sections/contact_section.dart';
 import 'package:portfolio_website/features/home/widgets/footer.dart';
 
@@ -120,7 +120,7 @@ class _HomePageState extends State<HomePage> {
                 // Experience Section
                 FadeInAnimation(
                   delay: 1.0,
-                  child: ExperienceSection(key: _sectionKeys[4]),
+                  child: experience.ExperienceSection(key: _sectionKeys[4]),
                 ),
                 // Contact Section
                 FadeInAnimation(

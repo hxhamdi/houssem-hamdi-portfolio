@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio_website/models/project_model.dart';
 import 'package:portfolio_website/shared/responsive/responsive_layout.dart';
 import 'package:portfolio_website/shared/animations/fade_in_animation.dart';
 import 'package:portfolio_website/features/projects/project_card.dart';
