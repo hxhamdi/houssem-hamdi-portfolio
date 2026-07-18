@@ -186,7 +186,9 @@ class HeroSection extends StatelessWidget {
                 ),
                 child: CircleAvatar(
                   radius: 150,
-                  backgroundImage: AssetImage(profile.heroImage),
+                  backgroundImage: profile.heroImage.startsWith('http')
+                      ? NetworkImage(profile.heroImage)
+                      : AssetImage(profile.heroImage) as ImageProvider,
                   backgroundColor: Colors.transparent,
                 ),
               ),

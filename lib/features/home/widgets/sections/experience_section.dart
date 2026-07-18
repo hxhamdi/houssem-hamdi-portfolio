@@ -3,6 +3,7 @@ import 'package:portfolio_website/models/experience_model.dart';
 import 'package:portfolio_website/shared/animations/fade_in_animation.dart';
 import 'package:provider/provider.dart';
 import 'package:portfolio_website/providers/portfolio_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ExperienceSection extends StatelessWidget {
   const ExperienceSection({super.key});
@@ -224,7 +225,7 @@ class ExperienceSection extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 12),
                           child: TextButton.icon(
                             onPressed: () {
-                              // Open URL
+                              _launchURL(exp.url);
                             },
                             icon: const Icon(Icons.link),
                             label: const Text('Voir le projet'),
@@ -239,5 +240,11 @@ class ExperienceSection extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _launchURL(String url) async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    }
   }
 }

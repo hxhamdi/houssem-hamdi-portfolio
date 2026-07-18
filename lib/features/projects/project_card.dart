@@ -38,7 +38,9 @@ class ProjectCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     image: DecorationImage(
-                      image: AssetImage(project.image),
+                      image: project.image.startsWith('http')
+                          ? NetworkImage(project.image)
+                          : AssetImage(project.image) as ImageProvider,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -67,15 +69,19 @@ class ProjectCard extends StatelessWidget {
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: project.techStack.map((tech) => Chip(
-                    label: Text(tech),
-                    backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-                    labelStyle: TextStyle(
-                      color: theme.colorScheme.primary,
-                      fontSize: 12,
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  )).toList(),
+                  children: project.techStack
+                      .map((tech) => Chip(
+                            label: Text(tech),
+                            backgroundColor:
+                                theme.colorScheme.primary.withOpacity(0.1),
+                            labelStyle: TextStyle(
+                              color: theme.colorScheme.primary,
+                              fontSize: 12,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                          ))
+                      .toList(),
                 ),
                 const SizedBox(height: 16),
 
@@ -92,15 +98,15 @@ class ProjectCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       ...project.details.map((detail) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• '),
-                            Expanded(child: Text(detail)),
-                          ],
-                        ),
-                      )),
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('• '),
+                                Expanded(child: Text(detail)),
+                              ],
+                            ),
+                          )),
                     ],
                   ),
                 const SizedBox(height: 16),
